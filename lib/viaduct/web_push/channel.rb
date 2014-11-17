@@ -29,6 +29,13 @@ module Viaduct
         WebPush.request('trigger', {:channel => channels.join(','), :event => event, :data => data.to_json})
       end
 
+      #
+      # Generate a HMAC signature for private channels
+      #
+      def self.generate_signature(session_id, channel)
+        OpenSSL::HMAC.hexdigest(OpenSSL::Digest::SHA256.new, WebPush.secret, "#{session_id}:#{channel}")
+      end
+
     end
   end
 end

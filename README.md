@@ -29,4 +29,7 @@ Viaduct::WebPush['test-channel'].trigger('say-hello', {
 Viaduct::WebPush::Channel.multi_trigger(['channel1', 'channel2'], 'say-hello', {
   :name => 'Adam'
 })
+
+# Generating a signature for private channels
+Viaduct::WebPush::Channel.generate_signature(session_id, channel_name)
 ```
