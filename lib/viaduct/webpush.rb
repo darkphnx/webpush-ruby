@@ -1,1 +1,1 @@
-require 'viadut/web_push'
+require 'viaduct/web_push'
