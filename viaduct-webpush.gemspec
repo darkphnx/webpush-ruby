@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = "viaduct-webpush"
-  s.version     = '1.0.2'
+  s.version     = '1.0.3'
   s.authors     = ["Adam Cooke"]
   s.email       = ["adam@viaduct.io"]
   s.homepage    = "http://viaduct.io"
