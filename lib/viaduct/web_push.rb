@@ -21,14 +21,14 @@ module Viaduct
       # Return the application token
       #
       def token
-        @token || raise(Error, "Must set `Viaudct::WebPush.token` to an application token")
+        @token || ENV['WEBPUSH_TOKEN'] || raise(Error, "Must set `Viaudct::WebPush.token` to an application token")
       end
 
       #
       # Return the application secret
       #
       def secret
-        @secret || raise(Error, "Must set `Viaudct::WebPush.secret` to an application secret")
+        @secret || ENV['WEBPUSH_SECRET'] || raise(Error, "Must set `Viaudct::WebPush.secret` to an application secret")
       end
 
       #
