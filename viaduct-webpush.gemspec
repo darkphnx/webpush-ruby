@@ -8,5 +8,6 @@ Gem::Specification.new do |s|
   s.description = "A client library allows messages to be sent to the WebPush API."
   s.files = Dir["{lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
   s.add_dependency "json", ">= 1.8", "< 2"
+  s.add_dependency "websocket", "~> 1.2"
   s.licenses    = ["MIT"]
 end
