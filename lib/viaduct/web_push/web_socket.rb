@@ -2,8 +2,6 @@ module Viaduct
   module WebPush
     class WebSocket
 
-      class HandshakeError < StandardError; end
-
       WAIT_EXCEPTIONS  = [Errno::EWOULDBLOCK, Errno::EAGAIN, IO::WaitReadable]
 
       #
@@ -15,7 +13,7 @@ module Viaduct
 
         ssl_ctx = OpenSSL::SSL::SSLContext.new
         # TODO: Verify certificate
-        ssl_ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        ssl_ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
 
         ssl = OpenSSL::SSL::SSLSocket.new(@connection, ssl_ctx)
         ssl.sync_close = true
