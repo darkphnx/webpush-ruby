@@ -1,75 +1,40 @@
+require 'logger'
+require 'websocket'
+require 'viaduct/web_push/web_socket/raw_socket'
+require 'viaduct/web_push/web_socket/connection'
+require 'viaduct/web_push/web_socket/channel'
+
 module Viaduct
   module WebPush
-    class WebSocket
+    module WebSocket
 
-      WAIT_EXCEPTIONS  = [Errno::EWOULDBLOCK, Errno::EAGAIN, IO::WaitReadable]
+      class HandshakeError < StandardError; end
 
-      #
-      # Open an SSL connection and perform the HTTP upgrade/websockets handhsake procedure
-      # 
-      def initialize
-        @handshake = ::WebSocket::Handshake::Client.new(:url => Viaduct::WebPush.websocket_endpoint)
-        @connection = TCPSocket.new(@handshake.host, @handshake.port || 443)
+      class << self
 
-        ssl_ctx = OpenSSL::SSL::SSLContext.new
-        # TODO: Verify certificate
-        ssl_ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
+        attr_writer :logger
+        attr_writer :endpoint
 
-        ssl = OpenSSL::SSL::SSLSocket.new(@connection, ssl_ctx)
-        ssl.sync_close = true
-        ssl.connect
-
-        @connection = ssl
-
-        @connection.write @handshake.to_s
-        @connection.flush
-
-        while line = @connection.gets
-          @handshake << line
-          break if @handshake.finished?
+        #
+        # Initialize a websocket connection for sending and receiving messages
+        # 
+        def connection(options={})
+          @connection ||= Connection.new(options)
         end
 
-        raise HandshakeError unless @handshake.valid?
-      end
+        #
+        # Return the endpoint for the websocket server
+        # 
+        def endpoint
+          @endpoint ||= "wss://#{Viaduct::WebPush.webpush_host}/vwp/socket/#{Viaduct::WebPush.token}"
+        end 
 
-      #
-      # Send a websocket frame out on the connection
-      # 
-      def send_data(message, type=:text)
-        frame = ::WebSocket::Frame::Outgoing::Client.new(:version => @handshake.version, :data => message, :type => type)
-        @connection.write frame.to_s
-        @connection.flush
-      end
 
-      #
-      # Read data from the socket and wait with IO#select
-      # 
-      def receive
-        frame = ::WebSocket::Frame::Incoming::Server.new(:version => @handshake.version)
-
-        begin
-          data = @connection.read_nonblock(1024)
-        rescue *WAIT_EXCEPTIONS
-          IO.select([@connection])
-          retry
+        def logger
+          @logger ||= Logger.new(STDOUT)
         end
-        frame << data
-
-        messages = []
-        while message = frame.next
-          messages << message.to_s
-        end
-
-        messages
+      
       end
-
-      #
-      # Close the connection
-      # 
-      def disconnect
-        @connection.close
-      end
-
     end
   end
 end

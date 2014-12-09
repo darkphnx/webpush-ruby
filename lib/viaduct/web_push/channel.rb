@@ -1,64 +1,34 @@
+# Class for sending messages to viaduct via the HTTP API
+
 module Viaduct
   module WebPush
     class Channel
 
-      attr_accessor :subscribed, :name, :bindings
-
-      def initialize(name, connection)
-        @name = name 
-        @connection = connection
-        @bindings = Hash.new([])
-        @subscribed = false
-      end
-
-      #
-      # Blank name indicates global channel
-      # 
-      def global?
-        @name.nil?
-      end
-
-      #
-      # Bind some code to an incoming message on this channel
-      # 
-      def bind(event, &block)
-        @bindings[event] += [block]
-      end
-
-      #
-      # Run the bindings for an event
-      # 
-      def dispatch(event, data)
-        @bindings[event].each do |binding|
-          binding.call(data)
-        end
-      end
-
-      #
-      # Send request subscription for this channel from VWP
-      # 
-      def register
-        return if @subscibed || global?
-
-        signature = self.class.generate_signature(@connection.session_id, @name)
-        @connection.register_subscription(@name, signature)
+      def initialize(name)
+        @name = name
       end
 
       #
       # Trigger an event on this channel
       #
       def trigger(event, data = {})
-        @connection.trigger(@name, event, data)
+        self.class.trigger(@name, event, data)
       end
 
-      def inspect
-        String.new.tap do |s|
-          s << "#<#{self.class.name}:#{self.object_id} "
-          s << [:name, :subscribed].map do |attrib|
-            "#{attrib}: #{self.send(attrib).inspect}"
-          end.join(', ')
-          s << ">"
-        end
+      #
+      # Trigger a single even on a given channel
+      #
+      def self.trigger(channel, event, data = {})
+        WebPush.request('trigger', {:channel => channel, :event => event, :data => data.to_json})
+      end
+
+
+      #
+      # Trigger an event on multiple channels simultaneously
+      #
+      def self.multi_trigger(channels, event, data = {})
+        raise Error, "`channels` must an arrayof strings" unless channels.all? { |c| c.is_a?(String) }
+        WebPush.request('trigger', {:channel => channels.join(','), :event => event, :data => data.to_json})
       end
 
       #
