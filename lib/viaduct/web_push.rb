@@ -1,6 +1,7 @@
 require 'json'
 require 'uri'
 require 'net/https'
+require 'viaduct/web_push/channel'
 
 module Viaduct
   module WebPush
@@ -50,7 +51,7 @@ module Viaduct
       #
       def [](name)
         @channels ||= {}
-        @channels[name] ||= HttpChannel.new(name)
+        @channels[name] ||= Channel.new(name)
       end
 
 
