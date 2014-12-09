@@ -41,7 +41,12 @@ module Viaduct
         def register
           return if @subscibed || global?
 
-          signature = self.class.generate_signature(@connection.session_id, @name)
+          if @name =~ /^private-/
+            signature = self.class.generate_signature(@connection.session_id, @name)
+          else
+            signature = nil
+          end
+          
           @connection.register_subscription(@name, signature)
         end
 
