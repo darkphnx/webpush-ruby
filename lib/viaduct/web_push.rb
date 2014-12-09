@@ -11,6 +11,7 @@ module Viaduct
   module WebPush
 
     class Error < StandardError; end
+    class HandshakeError < StandardError; end
 
     class << self
 
@@ -70,8 +71,8 @@ module Viaduct
       #
       # Initialize a websocket connection for sending and receiving messages
       # 
-      def connection
-        @connection ||= Connection.new(:authenticate => true)
+      def connection(options={})
+        @connection ||= Connection.new(options)
       end
 
       #

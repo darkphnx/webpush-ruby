@@ -4,8 +4,13 @@ module Viaduct
 
       attr_reader :connected, :session_id, :channels, :authenticated
 
+      DEFAULT_OPTIONS = {
+        :authenticate => true,
+        :autoconnect => true
+      }
+
       def initialize(options={})
-        @options = options
+        @options = DEFAULT_OPTIONS.merge(options)
 
         @connected = false
         @authenticated = false
@@ -45,6 +50,8 @@ module Viaduct
           @channels[channel_id].subscribed = true
           @logger.info "Subscribed to vwp #{data['channel_name']}"
         end
+
+        connect if @options[:autoconnect]
       end
 
       def [](channel_name)
@@ -69,7 +76,6 @@ module Viaduct
         return if @websocket
         @logger.debug "Connecting..."
 
-        Thread.abort_on_exception = true
         @websocket_thread = Thread.new do
           @websocket = WebSocket.new
           loop do
@@ -103,6 +109,8 @@ module Viaduct
       # Build a vwp message and send it via the websocket
       # 
       def trigger(channel_name, event, data)
+        return false unless @authenticated
+
         payload = JSON.generate({
           "event" => "vwp:send",
           "data" => {
