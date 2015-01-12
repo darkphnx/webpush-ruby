@@ -14,6 +14,7 @@ module Viaduct
 
           ssl_ctx = OpenSSL::SSL::SSLContext.new
           ssl_ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
+          ssl_ctx.cert_store = OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE
 
           ssl = OpenSSL::SSL::SSLSocket.new(@connection, ssl_ctx)
           ssl.sync_close = true
